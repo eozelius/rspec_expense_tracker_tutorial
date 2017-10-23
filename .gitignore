@@ -1,0 +1,4 @@
+.rspec
+.idea/
+Gemfile.lock
+spec/examples.txt
