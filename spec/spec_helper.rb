@@ -1,6 +1,8 @@
 ENV['RACK_ENV'] = 'test'
 
 RSpec.configure do |config|
+  config.filter_gems_from_backtrace 'rack', 'rack-test', 'sequel', 'sinatra'
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
@@ -37,9 +39,9 @@ RSpec.configure do |config|
   # Many RSpec users commonly either run the entire suite or an individual
   # file, and it's useful to allow more verbose output when running an
   # individual spec file.
-  if config.files_to_run.one?
-    config.default_formatter = "doc"
-  end
+  #if config.files_to_run.one?
+    #config.default_formatter = "doc"
+  #end
 
   # Print the 10 slowest examples and example groups at the
   # end of the spec run, to help surface which specs are running
