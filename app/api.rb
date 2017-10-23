@@ -1,5 +1,4 @@
-require 'sinatra/base'
-require 'json'
+require_relative 'dependency_helper'
 
 module ExpenseTracker
   class API < Sinatra::Base

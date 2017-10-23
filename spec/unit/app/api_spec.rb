@@ -1,16 +1,19 @@
 require_relative '../../../spec/dependency_helper'
 
 module ExpenseTracker
-  RecordResult = Struct.new(:success?, :expense_id, :error_message)
-
   RSpec.describe API do
     include Rack::Test::Methods
 
     # SETUP
-    let(:ledger)  { instance_double('ExpenseTracker::Ledger') }
+    let(:ledger)  { ExpenseTracker::Ledger.new }
     let(:expense) { { 'some' => 'data' } }
     def app
       API.new(ledger: ledger)
+    end
+
+    def parse_response(expected_inclusion)
+      parsed = JSON.parse(last_response.body)
+      expect(parsed).to include(expected_inclusion)
     end
 
     describe 'POST /expenses' do
@@ -23,8 +26,11 @@ module ExpenseTracker
 
         it 'returns the expense id' do
           post '/expenses', JSON.generate(expense)
-          parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('expense_id' => 417)
+          parse_response('expense_id' => 417)
+
+
+          # parsed = JSON.parse(last_response.body)
+          # expect(parsed).to include('expense_id' => 417)
         end
 
         it 'responds with a 200 (OK)' do
@@ -42,8 +48,7 @@ module ExpenseTracker
 
         it 'returns an error message' do
           post '/expenses', JSON.generate(expense)
-          parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('error' => 'Expense incomplete')
+          parse_response('error' => 'Expense incomplete')
         end
         it 'responds with a 422 (unprocessible entity)' do
           post '/expenses', JSON.generate(expense)
