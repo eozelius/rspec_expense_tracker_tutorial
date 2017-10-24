@@ -14,10 +14,10 @@ module ExpenseTracker
       API.new(ledger: ledger)
     end
 
-    def parse_response(expected_inclusion)
-      parsed = JSON.parse(last_response.body)
-      expect(parsed).to include(expected_inclusion)
+    def parsed_response
+      JSON.parse(last_response.body)
     end
+    # END SETUP
 
     describe 'GET /expenses/:date' do
       context 'when expenses exist on given date' do
@@ -28,11 +28,13 @@ module ExpenseTracker
         end
 
         it 'returns the expense records as JSON' do
+          post '/expenses', JSON.generate(expense)
           get "/expenses/#{date}"
-          parse_response([{ 'payee' => 'Coffee Tossy',
-                                            'amount' => 4.00,
-                                            'date' => '2017-01-01'}])
+
+          record_result = JSON.generate(Expense.new('Coffee Tossy', 4.00, '2017-01-01'))
+          expect(last_response.body).to eq(record_result)
         end
+
         it 'responds with a 200 (OK)' do
           get "/expenses/#{date}"
           expect(last_response.status).to eq(200)
@@ -42,8 +44,9 @@ module ExpenseTracker
       context 'when there are no expenses on the given date' do
         it 'returns an empty array as JSON' do
           get "/expenses/#{invalid_date}"
-          parse_response([])
+          expect(parsed_response).to eq([])
         end
+
         it 'responds with 200 (OK)' do
           get "/expenses/#{invalid_date}"
           expect(last_response.status).to eq(200)
@@ -61,7 +64,7 @@ module ExpenseTracker
 
         it 'returns the expense id' do
           post '/expenses', JSON.generate(expense)
-          parse_response('expense_id' => 417)
+          expect(parsed_response).to eq('expense_id' => 417)
         end
 
         it 'responds with a 200 (OK)' do
@@ -79,7 +82,7 @@ module ExpenseTracker
 
         it 'returns an error message' do
           post '/expenses', JSON.generate(expense)
-          parse_response('error' => 'Expense incomplete')
+          expect(parsed_response).to eq('error' => 'Expense incomplete')
         end
         it 'responds with a 422 (unprocessible entity)' do
           post '/expenses', JSON.generate(expense)
