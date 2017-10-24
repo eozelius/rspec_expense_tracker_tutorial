@@ -1,12 +1,18 @@
 require_relative '../../../spec/dependency_helper'
 
 module ExpenseTracker
-  # RSpec.describe Ledger, :aggregate_failures do
   RSpec.describe Ledger, :db do
     let(:ledger) { Ledger.new }
     let(:expense) do { 'payee'  => 'Coffee Tossy',
                        'amount' => 5.75,
                        'date'   => '2017-06-10' }
+    end
+
+    def confirm_failed_record(result)
+      expect(result).not_to be_success
+      expect(result.expense_id).to eq(nil)
+      expect(result.error_message).to eq('Invalid expense: [payee, amount, date] are required')
+      expect(DB[:expenses].count).to eq(0)
     end
 
     describe '#record' do
@@ -24,15 +30,23 @@ module ExpenseTracker
         end
       end
 
-      context 'when the expense lacks a payee' do
-        it 'rejects the expense as invalid' do
+      context 'when the expense lacks required keys' do
+        it 'when payee is missing, rejects the expense as invalid' do
           expense.delete('payee')
           result = ledger.record(expense)
+          confirm_failed_record(result)
+        end
 
-          expect(result).not_to be_success
-          expect(result.expense_id).to eq(nil)
-          expect(result.error_message).to include('[payee] is required')
-          expect(DB[:expenses].count).to eq(0)
+        it 'when amount is missing, rejects the expense' do
+          expense.delete('amount')
+          result = ledger.record(expense)
+          confirm_failed_record(result)
+        end
+
+        it 'when date is missing, rejects the expense' do
+          expense.delete('date')
+          result = ledger.record(expense)
+          confirm_failed_record(result)
         end
       end
     end

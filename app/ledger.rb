@@ -1,4 +1,5 @@
 require_relative 'dependency_helper'
+require_relative '../config/sequel'
 
 module ExpenseTracker
   RecordResult = Struct.new(:success?, :expense_id, :error_message)
@@ -9,8 +10,9 @@ module ExpenseTracker
     end
 
     def record(expense)
-      unless expense.key?('payee')
-        message = 'Invalid expense: [payee] is required'
+      # unless expense.key?("payee")
+      unless valid_expense(expense)
+        message = 'Invalid expense: [payee, amount, date] are required'
         return RecordResult.new(false, nil, message)
       end
 
@@ -25,5 +27,12 @@ module ExpenseTracker
     def expenses_on(date)
       DB[:expenses].where(date: date).all
     end
+
+    private
+
+     def valid_expense(expense)
+       return false unless expense.key?("payee") && expense.key?("amount") && expense.key?("date")
+       true
+     end
   end
 end
