@@ -2,3 +2,4 @@
 .idea/
 Gemfile.lock
 spec/examples.txt
+db/test.db
