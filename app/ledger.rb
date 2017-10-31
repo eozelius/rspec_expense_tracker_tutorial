@@ -10,7 +10,6 @@ module ExpenseTracker
     end
 
     def record(expense)
-      # unless expense.key?("payee")
       unless valid_expense(expense)
         message = 'Invalid expense: [payee, amount, date] are required'
         return RecordResult.new(false, nil, message)
@@ -30,9 +29,8 @@ module ExpenseTracker
 
     private
 
-     def valid_expense(expense)
-       return false unless expense.key?("payee") && expense.key?("amount") && expense.key?("date")
-       true
+      def valid_expense(expense)
+        expense.key?("payee") && expense.key?("amount") && expense.key?("date") ? true : false
      end
   end
 end
